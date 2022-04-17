@@ -16,10 +16,10 @@ If your function works properly, then when you feed it the string:
 ... should produce:
 
 746865206b696420646f6e277420706c6179
-*/
+ */
 use hex;
 
-pub fn xor(h1: &str, h2: &str) -> String {
+pub fn solve(h1: &str, h2: &str) -> String {
     let b1 = hex::decode(h1).unwrap();
     let b2 = hex::decode(h2).unwrap();
     let res = b1
@@ -37,7 +37,7 @@ mod tests {
     #[test]
     fn test_c02() {
         assert_eq!(
-            xor(
+            solve(
                 "1c0111001f010100061a024b53535009181c",
                 "686974207468652062756c6c277320657965"
             ),

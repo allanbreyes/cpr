@@ -13,7 +13,8 @@ You can do this by hand. But don't: write code to do it for you.
 
 How? Devise some method for "scoring" a piece of English plaintext. Character frequency
 is a good metric. Evaluate each output and choose the one with the best score.
-*/
+ */
+use super::utils;
 use hex;
 
 struct Candidate {
@@ -21,7 +22,7 @@ struct Candidate {
     text: String,
 }
 
-pub fn crack(hex: &str) -> String {
+pub fn solve(hex: &str) -> String {
     let bytes = hex::decode(hex).unwrap();
     let mut candidate = Candidate {
         score: 0,
@@ -29,7 +30,7 @@ pub fn crack(hex: &str) -> String {
     };
     for key in 0..255 {
         let text = decrypt(&bytes, key);
-        let score = score_text(&text);
+        let score = utils::score_text(&text);
         if score > candidate.score {
             candidate = Candidate { score, text };
         }
@@ -45,18 +46,6 @@ fn decrypt(bytes: &[u8], key: u8) -> String {
     decrypted
 }
 
-fn score_text(text: &str) -> u32 {
-    let mut score = 0;
-    for c in text.chars() {
-        match c {
-            'a'..='z' => score += 1,
-            'A'..='Z' => score += 1,
-            _ => (),
-        }
-    }
-    score
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -65,7 +54,7 @@ mod tests {
     fn test_c03() {
         let input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
         let expected = "Cooking MC's like a pound of bacon";
-        let actual = crack(input);
+        let actual = solve(input);
         assert_eq!(actual, expected);
     }
 }
