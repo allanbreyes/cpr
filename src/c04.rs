@@ -12,24 +12,25 @@ Find it.
 use super::c03;
 use super::utils;
 
-struct Candidate {
-    score: u32,
-    text: String,
-}
-
 pub fn solve(input: &str) -> String {
-    let mut candidate = Candidate {
-        score: 0,
-        text: String::new(),
+    let mut candidate = utils::Candidate {
+        score: 0.,
+        value: String::new(),
     };
     for line in input.lines() {
-        let text = c03::solve(line);
-        let score = utils::score_text(&text);
-        if score > candidate.score {
-            candidate = Candidate { score, text };
+        let result = c03::solve(line);
+        match result {
+            Some(value) => {
+                let score = utils::score_text(&value.as_bytes());
+                if score > candidate.score {
+                    candidate.score = score;
+                    candidate.value = value;
+                }
+            }
+            None => (),
         }
     }
-    candidate.text
+    candidate.value
 }
 
 #[cfg(test)]

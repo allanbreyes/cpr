@@ -17,33 +17,27 @@ is a good metric. Evaluate each output and choose the one with the best score.
 use super::utils;
 use hex;
 
-struct Candidate {
-    score: u32,
-    text: String,
-}
-
-pub fn solve(hex: &str) -> String {
+pub fn solve(hex: &str) -> Option<String> {
     let bytes = hex::decode(hex).unwrap();
-    let mut candidate = Candidate {
-        score: 0,
-        text: String::new(),
+    let mut candidate = utils::Candidate {
+        score: 0.,
+        value: Vec::new(),
     };
-    for key in 0..255 {
-        let text = decrypt(&bytes, key);
-        let score = utils::score_text(&text);
+    for key in 0..=255 {
+        let xored = utils::single_byte_xor(&bytes, key);
+        let score = utils::score_text(&xored);
         if score > candidate.score {
-            candidate = Candidate { score, text };
+            candidate = utils::Candidate {
+                score,
+                value: xored,
+            };
         }
     }
-    candidate.text
-}
-
-fn decrypt(bytes: &[u8], key: u8) -> String {
-    let mut decrypted = String::new();
-    for byte in bytes {
-        decrypted.push((byte ^ key.clone()) as char);
+    let result = String::from_utf8(candidate.value);
+    match result {
+        Ok(result) => Some(result),
+        Err(_) => None,
     }
-    decrypted
 }
 
 #[cfg(test)]
@@ -54,7 +48,7 @@ mod tests {
     fn test_c03() {
         let input = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
         let expected = "Cooking MC's like a pound of bacon";
-        let actual = solve(input);
+        let actual = solve(input).unwrap();
         assert_eq!(actual, expected);
     }
 }
