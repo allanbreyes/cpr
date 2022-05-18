@@ -1,0 +1,31 @@
+---
+version: "3"
+
+vars:
+  LINE_LENGTH: 80
+
+tasks:
+  default:
+    - task: all
+
+  up:
+    desc: Runs nix-shell and task runner. Assumes taskfile installed locally.
+    cmds:
+      - nix-shell --run "task"
+
+  all:
+    desc: Format, test, and lint code.
+    deps:
+      - test
+      - fmt
+
+  fmt:
+    desc: Format and lint code.
+    cmds:
+      - cargo fmt
+      - cargo clippy
+
+  test:
+    desc: Run unit tests.
+    cmds:
+      - cargo test

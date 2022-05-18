@@ -19,15 +19,12 @@ pub fn solve(input: &str) -> String {
     };
     for line in input.lines() {
         let result = c03::solve(line);
-        match result {
-            Some(value) => {
-                let score = utils::score_text(&value.as_bytes());
-                if score > candidate.score {
-                    candidate.score = score;
-                    candidate.value = value;
-                }
+        if let Some(value) = result {
+            let score = utils::score_text(value.as_bytes());
+            if score > candidate.score {
+                candidate.score = score;
+                candidate.value = value;
             }
-            None => (),
         }
     }
     candidate.value
