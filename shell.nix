@@ -1,17 +1,21 @@
 { pkgs ? import <nixpkgs> {}}:
 
 pkgs.mkShell {
-  buildInputs = with pkgs; [
-    # Rust
+  nativeBuildInputs = with pkgs; [
     cargo
+    gcc
+    rustc
+  ];
+  buildInputs = with pkgs; [
     clippy
     rust-analyzer
-    rustc
     rustfmt
 
     # Tooling
     go-task
+    wget
   ];
 
   RUST_BACKTRACE = 1;
+  RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
 }

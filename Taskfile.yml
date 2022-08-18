@@ -2,7 +2,7 @@
 version: "3"
 
 vars:
-  LINE_LENGTH: 80
+  STATIC_URL: "https://cryptopals.com/static/challenge-data"
 
 tasks:
   default:
@@ -16,8 +16,26 @@ tasks:
   all:
     desc: Format, test, and lint code.
     deps:
+      - data
       - test
       - fmt
+
+  data:
+    desc: Set up test data.
+    cmds:
+      - task: download
+        vars: { FILE: 4.txt }
+      - task: download
+        vars: { FILE: 6.txt }
+
+  download:
+    desc: Download test data.
+    label: "download-{{ .FILE }}"
+    cmds:
+      - mkdir -p ./data
+      - wget -q -O "./data/{{ .FILE }}" "{{ .STATIC_URL }}/{{ .FILE }}"
+    status:
+      - test -f "./data/{{ .FILE }}"
 
   fmt:
     desc: Format and lint code.
