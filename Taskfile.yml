@@ -29,6 +29,8 @@ tasks:
         vars: { FILE: 6.txt }
       - task: download
         vars: { FILE: 7.txt }
+      - task: download
+        vars: { FILE: 8.txt }
 
   download:
     desc: Download test data.
