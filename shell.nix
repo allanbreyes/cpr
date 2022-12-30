@@ -13,10 +13,6 @@ pkgs.mkShell {
     openssl
     rust-analyzer
     rustfmt
-
-    # Tooling
-    go-task
-    wget
   ];
 
   RUST_BACKTRACE = 1;
