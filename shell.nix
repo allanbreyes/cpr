@@ -9,6 +9,8 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     cargo-watch
     clippy
+    pkg-config
+    openssl
     rust-analyzer
     rustfmt
 

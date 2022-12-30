@@ -9,7 +9,7 @@ pub struct Candidate<T> {
 pub fn crack_single_byte_xor(
     ciphertext: &[u8],
     heuristic: fn(bytes: &[u8]) -> f32,
-) -> (u8, Vec<u8>) {
+) -> (u8, Candidate<Vec<u8>>) {
     let mut best = Candidate {
         score: 0.,
         value: Vec::new(),
@@ -23,7 +23,7 @@ pub fn crack_single_byte_xor(
             best_key = key;
         }
     }
-    (best_key, best.value)
+    (best_key, best)
 }
 
 /// Compute the Hamming distance between two byte sequences.
