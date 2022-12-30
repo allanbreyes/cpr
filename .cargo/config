@@ -1,2 +1,3 @@
 [alias]
+scaffold = "run --bin scaffold -- "
 solve = "run --bin"
