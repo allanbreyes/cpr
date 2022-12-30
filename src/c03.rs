@@ -19,21 +19,8 @@ use hex;
 
 pub fn solve(hex: &str) -> Option<String> {
     let bytes = hex::decode(hex).unwrap();
-    let mut candidate = utils::Candidate {
-        score: 0.,
-        value: Vec::new(),
-    };
-    for key in 0..=255 {
-        let xored = utils::single_byte_xor(&bytes, key);
-        let score = utils::score_text(&xored);
-        if score > candidate.score {
-            candidate = utils::Candidate {
-                score,
-                value: xored,
-            };
-        }
-    }
-    let result = String::from_utf8(candidate.value);
+    let (_key, cracked) = utils::crack_single_byte_xor(&bytes, utils::score_text);
+    let result = String::from_utf8(cracked);
     match result {
         Ok(result) => Some(result),
         Err(_) => None,

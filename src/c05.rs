@@ -21,13 +21,11 @@ a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f
 Encrypt a bunch of stuff using your repeating-key XOR function. Encrypt your mail. Encrypt your
 password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with this.
  */
+use super::utils;
+
 pub fn solve(plaintext: &str, key: &str) -> String {
-    let mut ciphertext = String::new();
-    for (i, c) in plaintext.chars().enumerate() {
-        let xor = (c as u8) ^ (key.chars().nth(i % key.len()).unwrap() as u8);
-        ciphertext.push(xor as char);
-    }
-    hex::encode(ciphertext.as_bytes())
+    let ciphertext = utils::repeating_key_xor(plaintext.as_bytes(), key.as_bytes());
+    hex::encode(ciphertext)
 }
 
 #[cfg(test)]

@@ -47,3 +47,8 @@ tasks:
     desc: Run unit tests.
     cmds:
       - cargo test
+
+  watch:
+    desc: Watch and run unit tests.
+    cmds:
+      - cargo watch -x test
