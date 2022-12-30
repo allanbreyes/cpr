@@ -26,7 +26,7 @@ pub fn crack_single_byte_xor(
     (best_key, best.value)
 }
 
-/// Compute the Hamming distance between two byte sequences..
+/// Compute the Hamming distance between two byte sequences.
 ///
 /// # Examples
 /// ```
@@ -39,6 +39,16 @@ pub fn hamming(s1: &[u8], s2: &[u8]) -> u32 {
         .zip(s2.iter())
         .map(|(c1, c2)| (c1 ^ c2).count_ones())
         .sum()
+}
+
+/// PKCS#7 padding.
+///
+/// See challenge 9.
+pub fn pkcs7_pad(bytes: &[u8], block_size: usize) -> Vec<u8> {
+    let pad_len = block_size - (bytes.len() % block_size);
+    let mut padded = bytes.to_vec();
+    padded.append(&mut vec![pad_len as u8; pad_len]);
+    padded
 }
 
 /// Apply a repeating-key XOR.
