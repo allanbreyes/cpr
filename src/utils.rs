@@ -1,6 +1,36 @@
+use aes::{
+    cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit},
+    Aes128,
+};
+
 pub struct Candidate<T> {
     pub score: f32,
     pub value: T,
+}
+
+/// Apply AES in CBC mode.
+///
+/// See challenge 10.
+pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
+    assert!(decrypt, "CBC encryption not implemented");
+
+    let cipher = Aes128::new(GenericArray::from_slice(key));
+    let mut prev = iv.to_vec();
+    let lol: Vec<u8> = bytes
+        .chunks(block_size)
+        .flat_map(|chunk| {
+            let mut block = GenericArray::from_slice(chunk).to_owned();
+            cipher.decrypt_block(&mut block);
+            let out = block
+                .iter()
+                .zip(prev.iter())
+                .map(|(b, p)| b ^ p)
+                .collect::<Vec<u8>>();
+            prev = chunk.to_owned();
+            out
+        })
+        .collect();
+    lol
 }
 
 /// Crack a single-byte XOR cipher.
@@ -24,6 +54,25 @@ pub fn crack_single_byte_xor(
         }
     }
     (best_key, best)
+}
+
+/// Apply AES in ECB mode.
+///
+/// See challenge 7.
+pub fn ecb(bytes: &[u8], key: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
+    let cipher = Aes128::new(GenericArray::from_slice(key));
+    bytes
+        .chunks(block_size)
+        .flat_map(|chunk| {
+            let mut block = GenericArray::from_slice(chunk).to_owned();
+            if decrypt {
+                cipher.decrypt_block(&mut block);
+            } else {
+                cipher.encrypt_block(&mut block);
+            }
+            block.to_vec()
+        })
+        .collect()
 }
 
 /// Compute the Hamming distance between two byte sequences.
