@@ -10,6 +10,8 @@ pub struct Candidate<T> {
     pub value: T,
 }
 
+pub type Oracle = dyn Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>>;
+
 /// Apply AES in CBC mode.
 ///
 /// See challenge 10.
@@ -69,14 +71,11 @@ pub fn crack_single_byte_xor(
 }
 
 /// Detect length and block size given an encryption oracle.
-pub fn detect_lengths(
-    oracle: impl Fn(Vec<u8>) -> Vec<u8>,
-    max_guess: usize,
-) -> Option<(usize, usize)> {
-    let mut prev = oracle(b"".to_vec());
+pub fn detect_lengths(oracle: &Oracle, max_guess: usize) -> Option<(usize, usize)> {
+    let mut prev = oracle(b"".to_vec()).ok()?;
     let length = prev.len();
     for i in 0..max_guess {
-        let out = oracle(vec![0x41; i]);
+        let out = oracle(vec![0x41; i]).ok()?;
         if out.len() > prev.len() {
             return Some((length - i + 1, out.len() - prev.len()));
         }

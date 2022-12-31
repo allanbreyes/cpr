@@ -4,7 +4,12 @@ use std::{error::Error, str::FromStr, string::ToString};
 
 pub fn solve(_input: &str) -> Option<String> {
     let (key, oracle) = make_oracle();
-    let (length, block_size) = utils::detect_lengths(&oracle, 100)?;
+    let ct = attack(&oracle)?;
+    Some(hex::encode([&key[..], &ct[..]].concat()))
+}
+
+fn attack(oracle: &utils::Oracle) -> Option<Vec<u8>> {
+    let (length, block_size) = utils::detect_lengths(oracle, 100)?;
 
     // 0123456789abcdef | 0123456789abcdef | 0123456789abcdef | 0123456789abcdef
     // email=aaaaaaaaaa | aaaaaaaaaa@evil. | com&uid=10&role= | user
@@ -16,7 +21,7 @@ pub fn solve(_input: &str) -> Option<String> {
         .chain(&domain)
         .cloned()
         .collect();
-    let ct1 = oracle(pt1);
+    let ct1 = oracle(pt1).ok()?;
 
     // 0123456789abcdef | 0123456789abcdef | 0123456789abcdef | 0123456789abcdef
     // email=aaaaaaaaaa | admin00000000000 | &uid=10&role=use | r
@@ -28,11 +33,11 @@ pub fn solve(_input: &str) -> Option<String> {
         .cloned()
         .collect();
 
-    let ct2 = oracle(pt2);
+    let ct2 = oracle(pt2).ok()?;
 
     // 0123456789abcdef | 0123456789abcdef | 0123456789abcdef | 0123456789abcdef
     // <-- ct1[0] ----> | <-- ct1[1] ----> | <-- ct1[2] ----> | <-- ct2[1] ---->
-    let ct3: Vec<u8> = [
+    let ct: Vec<u8> = [
         ct1[..(block_size * 3)].to_vec(),
         ct2[(block_size)..(block_size * 2)].to_vec(),
     ]
@@ -41,8 +46,7 @@ pub fn solve(_input: &str) -> Option<String> {
     .cloned()
     .collect();
 
-    // Return the hex-encoded key (for testing) and the tampered ciphertext
-    Some(hex::encode([&key[..], &ct3[..]].concat()))
+    Some(ct)
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -118,10 +122,10 @@ impl Cookie {
     }
 }
 
-fn make_oracle() -> (Vec<u8>, impl Fn(Vec<u8>) -> Vec<u8>) {
+fn make_oracle() -> (Vec<u8>, impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>>) {
     let key = utils::rand_bytes(16);
     (key.clone(), move |input| {
-        Cookie::profile_for(&String::from_utf8(input).unwrap()).encrypt(&key.clone())
+        Ok(Cookie::profile_for(&String::from_utf8(input).unwrap()).encrypt(&key.clone()))
     })
 }
 
