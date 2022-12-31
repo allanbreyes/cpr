@@ -148,6 +148,30 @@ pub fn pkcs7_pad(bytes: &[u8], block_size: usize) -> Vec<u8> {
     padded
 }
 
+/// PKCS#7 validation.
+///
+/// See challenge 15.
+///
+/// # Examples
+/// ```
+/// use cpr::utils::pkcs7_valid;
+/// assert!(pkcs7_valid(b"ICE ICE BABY\x04\x04\x04\x04", 16));
+/// assert!(!pkcs7_valid(b"ICE ICE BABY\x05\x05\x05\x05", 16));
+/// assert!(!pkcs7_valid(b"ICE ICE BABY\x01\x02\x03\x04", 16));
+/// ```
+pub fn pkcs7_valid(bytes: &[u8], block_size: usize) -> bool {
+    if bytes.len() % block_size != 0 {
+        return false;
+    }
+    let pad_len = bytes[bytes.len() - 1] as usize;
+    if pad_len == 0 || pad_len > block_size {
+        return false;
+    }
+    bytes[bytes.len() - pad_len..]
+        .iter()
+        .all(|&b| b == pad_len as u8)
+}
+
 /// Generate a random key.
 pub fn rand_bytes(size: usize) -> Vec<u8> {
     let mut rng = rand::thread_rng();
