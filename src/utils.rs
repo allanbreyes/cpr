@@ -2,6 +2,7 @@ use aes::{
     cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit},
     Aes128,
 };
+use rand::Rng;
 use std::collections::HashMap;
 
 pub struct Candidate<T> {
@@ -146,6 +147,12 @@ pub fn pkcs7_pad(bytes: &[u8], block_size: usize) -> Vec<u8> {
     let mut padded = bytes.to_vec();
     padded.append(&mut vec![pad_len as u8; pad_len]);
     padded
+}
+
+/// Generate a random key.
+pub fn rand_bytes(size: usize) -> Vec<u8> {
+    let mut rng = rand::thread_rng();
+    (0..size).map(|_| rng.gen()).collect()
 }
 
 /// Apply a repeating-key XOR.

@@ -1,8 +1,6 @@
 use cpr::utils;
 use std::error::Error;
 
-const KEY: &[u8] = b"YELLOW SUBMARINE";
-
 pub fn solve(input: &str) -> Option<String> {
     let plaintext = base64::decode(input.trim()).ok()?;
     let oracle = make_oracle(plaintext);
@@ -34,6 +32,7 @@ pub fn solve(input: &str) -> Option<String> {
 }
 
 fn make_oracle(plaintext: Vec<u8>) -> impl Fn(Vec<u8>) -> Vec<u8> {
+    let key = utils::rand_bytes(16);
     move |prefix| {
         utils::ecb(
             &prefix
@@ -41,7 +40,7 @@ fn make_oracle(plaintext: Vec<u8>) -> impl Fn(Vec<u8>) -> Vec<u8> {
                 .chain(plaintext.iter())
                 .cloned()
                 .collect::<Vec<u8>>(),
-            KEY,
+            &key,
             16,
             false,
         )

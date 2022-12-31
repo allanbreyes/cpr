@@ -2,20 +2,26 @@
 use cpr::utils;
 use std::{error::Error, str::FromStr, string::ToString};
 
-const KEY: &[u8] = b"YELLOW SUBMARINE";
-
 pub fn solve(_input: &str) -> Option<String> {
-    let (_, block_size) = utils::detect_lengths(oracle, 100)?;
+    let (key, oracle) = make_oracle();
+    let (length, block_size) = utils::detect_lengths(&oracle, 100)?;
 
     // 0123456789abcdef | 0123456789abcdef | 0123456789abcdef | 0123456789abcdef
-    // email=aaaaaaaaaa | bbbbbbbbbb@evil. | com&uid=10&role= | user
-    let pt1 = b"aaaaaaaaaabbbbbbbbbb@evil.com".to_vec();
+    // email=aaaaaaaaaa | aaaaaaaaaa@evil. | com&uid=10&role= | user
+    let target_length = block_size * 3 + b"user".len();
+    let domain = b"@evil.com".to_vec();
+    let pt1 = b"a"
+        .repeat(target_length - length - domain.len())
+        .iter()
+        .chain(&domain)
+        .cloned()
+        .collect();
     let ct1 = oracle(pt1);
 
     // 0123456789abcdef | 0123456789abcdef | 0123456789abcdef | 0123456789abcdef
-    // email=cccccccccc | admin00000000000 | &uid=10&role=use | r
+    // email=aaaaaaaaaa | admin00000000000 | &uid=10&role=use | r
     let admin_block = utils::pkcs7_pad(b"admin", block_size);
-    let pt2: Vec<u8> = b"c"
+    let pt2: Vec<u8> = b"a"
         .repeat(block_size - b"email=".len())
         .iter()
         .chain(&admin_block)
@@ -35,7 +41,8 @@ pub fn solve(_input: &str) -> Option<String> {
     .cloned()
     .collect();
 
-    Some(base64::encode(ct3))
+    // Return the hex-encoded key (for testing) and the tampered ciphertext
+    Some(hex::encode([&key[..], &ct3[..]].concat()))
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -111,15 +118,19 @@ impl Cookie {
     }
 }
 
-fn oracle(input: Vec<u8>) -> Vec<u8> {
-    Cookie::profile_for(&String::from_utf8(input).unwrap()).encrypt(KEY)
+fn make_oracle() -> (Vec<u8>, impl Fn(Vec<u8>) -> Vec<u8>) {
+    let key = utils::rand_bytes(16);
+    (key.clone(), move |input| {
+        Cookie::profile_for(&String::from_utf8(input).unwrap()).encrypt(&key.clone())
+    })
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
     let input = &cpr::read_data(13, false)?;
     let solution = cpr::solve!(13, solve, input).ok_or("no solution")?;
-    let ciphertext = base64::decode(&solution)?;
-    let cookie = Cookie::decrypt(&ciphertext, KEY)?;
+    let bytes = hex::decode(&solution)?;
+    let (key, ciphertext) = bytes.split_at(16);
+    let cookie = Cookie::decrypt(ciphertext, key)?;
     if cookie.is_admin() {
         eprintln!("{}=> {:?}{}", cpr::GREY, cookie, cpr::RESET);
         return Ok(());
@@ -137,8 +148,9 @@ mod tests {
     fn test() -> Result<(), Box<dyn Error>> {
         let input = &cpr::read_data(13, false)?;
         let got = solve(input).ok_or("no result")?;
-        let ciphertext = base64::decode(&got)?;
-        let cookie = Cookie::decrypt(&ciphertext, KEY)?;
+        let bytes = hex::decode(&got)?;
+        let (key, ciphertext) = bytes.split_at(16);
+        let cookie = Cookie::decrypt(&ciphertext, key)?;
         assert!(cookie.is_admin());
         Ok(())
     }
