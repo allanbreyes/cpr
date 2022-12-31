@@ -25,7 +25,7 @@ mod tests {
 
     #[test]
     fn test() -> Result<(), Box<dyn Error>> {
-        let input = &cpr::read_data(CHALLENGE, true)?;
+        let input = &cpr::read_data(CHALLENGE, false)?;
         let want = Some("TODO".into());
         let has = "TODO";
         let got = solve(input);

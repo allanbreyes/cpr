@@ -67,12 +67,29 @@ pub fn crack_single_byte_xor(
     (best_key, best)
 }
 
+/// Detect length and block size given an encryption oracle.
+pub fn detect_lengths(
+    oracle: impl Fn(Vec<u8>) -> Vec<u8>,
+    max_guess: usize,
+) -> Option<(usize, usize)> {
+    let mut prev = oracle(b"".to_vec());
+    let length = prev.len();
+    for i in 0..max_guess {
+        let out = oracle(vec![0x41; i]);
+        if out.len() > prev.len() {
+            return Some((length - i + 1, out.len() - prev.len()));
+        }
+        prev = out;
+    }
+    None
+}
+
 /// Detect AES in ECB mode.
 ///
 /// See challenge 8.
 /// TODO: automatically try and detect block size?
 pub fn detect_ecb(ciphertext: &[u8], block_size: usize) -> bool {
-    pkcs7_pad(ciphertext, block_size)
+    ciphertext
         .chunks(block_size)
         .fold(HashMap::new(), |mut blocks, block| {
             *blocks.entry(block).or_insert(0) += 1;
@@ -89,7 +106,7 @@ pub fn detect_ecb(ciphertext: &[u8], block_size: usize) -> bool {
 /// See challenge 7.
 pub fn ecb(bytes: &[u8], key: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
     let cipher = Aes128::new(GenericArray::from_slice(key));
-    bytes
+    pkcs7_pad(bytes, block_size)
         .chunks(block_size)
         .flat_map(|chunk| {
             let mut block = GenericArray::from_slice(chunk).to_owned();
