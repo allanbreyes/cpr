@@ -1,22 +1,15 @@
 // Detect AES in ECB mode
-use std::{collections::HashMap, error::Error};
+use cpr::utils;
+use std::error::Error;
 
 pub fn solve(ciphertexts: &str) -> Option<String> {
-    let (_, line) = ciphertexts
+    let line = ciphertexts
         .trim()
         .lines()
         .find_map(|line| {
             let ciphertext = hex::decode(line).ok()?;
-            let mut blocks = HashMap::new();
-            for block in ciphertext.chunks(16) {
-                *blocks.entry(block).or_insert(0) += 1;
-            }
-            let score: u32 = blocks
-                .values()
-                .filter_map(|&count| if count > 1 { Some(count) } else { None })
-                .sum();
-            if score > 0 {
-                Some((score, line.to_string()))
+            if utils::detect_ecb(&ciphertext, 16) {
+                Some(line.to_string())
             } else {
                 None
             }

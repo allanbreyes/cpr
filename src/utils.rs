@@ -2,6 +2,7 @@ use aes::{
     cipher::{generic_array::GenericArray, BlockDecrypt, BlockEncrypt, KeyInit},
     Aes128,
 };
+use std::collections::HashMap;
 
 pub struct Candidate<T> {
     pub score: f32,
@@ -12,25 +13,35 @@ pub struct Candidate<T> {
 ///
 /// See challenge 10.
 pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
-    assert!(decrypt, "CBC encryption not implemented");
-
     let cipher = Aes128::new(GenericArray::from_slice(key));
     let mut prev = iv.to_vec();
-    let lol: Vec<u8> = bytes
+    pkcs7_pad(bytes, block_size)
         .chunks(block_size)
         .flat_map(|chunk| {
-            let mut block = GenericArray::from_slice(chunk).to_owned();
-            cipher.decrypt_block(&mut block);
-            let out = block
-                .iter()
-                .zip(prev.iter())
-                .map(|(b, p)| b ^ p)
-                .collect::<Vec<u8>>();
-            prev = chunk.to_owned();
-            out
+            if decrypt {
+                let mut block = GenericArray::from_slice(chunk).to_owned();
+                cipher.decrypt_block(&mut block);
+                let out = block
+                    .iter()
+                    .zip(prev.iter())
+                    .map(|(b, p)| b ^ p)
+                    .collect::<Vec<u8>>();
+                prev = chunk.to_owned();
+                out
+            } else {
+                let xor = chunk
+                    .iter()
+                    .zip(prev.iter())
+                    .map(|(b, p)| b ^ p)
+                    .collect::<Vec<u8>>();
+                let mut block = GenericArray::from_slice(&xor).to_owned();
+                cipher.encrypt_block(&mut block);
+                let out = block.to_vec();
+                prev = out.to_owned();
+                out
+            }
         })
-        .collect();
-    lol
+        .collect()
 }
 
 /// Crack a single-byte XOR cipher.
@@ -54,6 +65,23 @@ pub fn crack_single_byte_xor(
         }
     }
     (best_key, best)
+}
+
+/// Detect AES in ECB mode.
+///
+/// See challenge 8.
+/// TODO: automatically try and detect block size?
+pub fn detect_ecb(ciphertext: &[u8], block_size: usize) -> bool {
+    pkcs7_pad(ciphertext, block_size)
+        .chunks(block_size)
+        .fold(HashMap::new(), |mut blocks, block| {
+            *blocks.entry(block).or_insert(0) += 1;
+            blocks
+        })
+        .values()
+        .filter_map(|&count| if count > 1 { Some(count) } else { None })
+        .sum::<u32>()
+        > 0
 }
 
 /// Apply AES in ECB mode.
@@ -94,6 +122,9 @@ pub fn hamming(s1: &[u8], s2: &[u8]) -> u32 {
 ///
 /// See challenge 9.
 pub fn pkcs7_pad(bytes: &[u8], block_size: usize) -> Vec<u8> {
+    if bytes.len() % block_size == 0 {
+        return bytes.to_vec();
+    }
     let pad_len = block_size - (bytes.len() % block_size);
     let mut padded = bytes.to_vec();
     padded.append(&mut vec![pad_len as u8; pad_len]);
