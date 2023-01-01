@@ -81,6 +81,36 @@ pub fn crack_single_byte_xor(
     (best_key, best)
 }
 
+/// CTR stream cipher.
+///
+/// See challenge 18.
+pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, block_size: usize) -> Vec<u8> {
+    let cipher = Aes128::new(GenericArray::from_slice(key));
+    let mut counter: u64 = 0;
+    bytes
+        .chunks(block_size)
+        .flat_map(|chunk| {
+            let mut block = GenericArray::from_slice(
+                &nonce
+                    .to_le_bytes()
+                    .iter()
+                    .chain(&counter.to_le_bytes())
+                    .cloned()
+                    .collect::<Vec<u8>>(),
+            )
+            .to_owned();
+            cipher.encrypt_block(&mut block);
+            let out = block
+                .iter()
+                .zip(chunk.iter())
+                .map(|(b, p)| b ^ p)
+                .collect::<Vec<u8>>();
+            counter += 1;
+            out
+        })
+        .collect()
+}
+
 /// Detect length and block size given an encryption oracle.
 pub fn detect_lengths(oracle: &Oracle, max_guess: usize) -> Option<(usize, usize)> {
     let mut prev = oracle(b"".to_vec()).ok()?;
