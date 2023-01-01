@@ -159,6 +159,17 @@ pub fn pkcs7_pad(bytes: &[u8], block_size: usize) -> Vec<u8> {
     padded
 }
 
+/// Remove PKCS#7 padding.
+pub fn pkcs7_unpad(bytes: &[u8]) -> Option<Vec<u8>> {
+    let pad_len = bytes[bytes.len() - 1] as usize;
+    if pad_len == 0 || pad_len > bytes.len() {
+        return None;
+    }
+    let mut unpadded = bytes.to_vec();
+    unpadded.truncate(unpadded.len() - pad_len);
+    Some(unpadded)
+}
+
 /// PKCS#7 validation.
 ///
 /// See challenge 15.
