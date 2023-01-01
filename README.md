@@ -11,7 +11,7 @@ Solutions for [**C**rypto**P**als][cryptopals] in [**R**ust][rust].
 ## Usage
 
 * Run (fast) tests: `cargo test`
-* Run the test watcher: `cargo watch -x test`
+* Run the test watcher: `cargo watch -x test` or `cargo tdd <number>`
 * Run an individual challenge: `cargo solve <number>`
 * Scaffold a new challenge: `cargo scaffold <number>`
 

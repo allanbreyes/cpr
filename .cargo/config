@@ -1,3 +1,4 @@
 [alias]
 scaffold = "run --bin scaffold -- "
 solve = "run --bin"
+tdd = "watch -- cargo test --bin"

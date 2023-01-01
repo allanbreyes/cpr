@@ -15,6 +15,17 @@ pub type Oracle = dyn Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>>
 /// Apply AES in CBC mode.
 ///
 /// See challenge 10.
+///
+/// # Examples
+/// ```
+/// use cpr::utils::{cbc, rand_bytes};
+/// let key = rand_bytes(16);
+/// let iv = rand_bytes(key.len());
+/// let pt = b"YELLOW SUBMARINE";
+/// let ct = cbc(pt, &key, &iv, key.len(), false);
+/// let out = cbc(&ct, &key, &iv, key.len(), true);
+/// assert_eq!(pt, &out[..]);
+/// ```
 pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
     let cipher = Aes128::new(GenericArray::from_slice(key));
     let mut prev = iv.to_vec();
@@ -248,4 +259,22 @@ pub fn score_text(text: &[u8]) -> f32 {
 /// ```
 pub fn single_byte_xor(plaintext: &[u8], key: u8) -> Vec<u8> {
     plaintext.iter().map(|b| b ^ key).collect()
+}
+
+/// Decode UTF-8 bytes in a more forgiving way.
+pub fn utf8_decode(bytes: &[u8]) -> String {
+    let mut s = String::new();
+    for b in bytes {
+        if *b < 0x80 {
+            s.push(*b as char);
+        } else {
+            s.push_str(&format!("\\x{:02x}", b));
+        }
+    }
+    s
+}
+
+/// Element-wise XOR of two byte sequences.
+pub fn xor(b1: &[u8], b2: &[u8]) -> Vec<u8> {
+    b1.iter().zip(b2.iter()).map(|(b1, b2)| b1 ^ b2).collect()
 }
