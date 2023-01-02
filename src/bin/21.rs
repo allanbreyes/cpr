@@ -1,3 +1,4 @@
+// Implement the MT19937 Mersenne Twister RNG
 use cpr::utils;
 use std::error::Error;
 
