@@ -1,4 +1,8 @@
 // Break fixed-nonce CTR mode using substitutions
+// NOTE: Woopsie, I ended up solving this like challenge 20, and cracking it
+// like repeating-key XOR. In retrospect, I think the authors zeroed out the
+// nonce and expected people to use a known nonce and counter to crack this like
+// a Vignere/substitution cipher.
 use cpr::utils;
 use std::error::Error;
 
