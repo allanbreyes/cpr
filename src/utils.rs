@@ -202,8 +202,18 @@ struct MT19937Config {
     upper_mask: u32,
 }
 
+impl Default for MT19937 {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MT19937 {
-    pub fn new(seed: u32) -> Self {
+    pub fn new() -> Self {
+        Self::from_seed(rand::thread_rng().gen())
+    }
+
+    pub fn from_seed(seed: u32) -> Self {
         // Use known coefficients
         let n = 624;
         let r = 31;

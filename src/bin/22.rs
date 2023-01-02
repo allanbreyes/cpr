@@ -17,7 +17,7 @@ pub fn solve(_input: &str) -> Option<String> {
         + rand::thread_rng().gen_range(0..5_000); // See you in 2038
 
     // "Seeds the RNG with the current Unix timestamp"
-    let mut prng = utils::MT19937::new(seed);
+    let mut prng = utils::MT19937::from_seed(seed);
 
     // "Waits a random number of seconds again."
     let time = seed + rand::thread_rng().gen_range(0..5_000);
@@ -34,7 +34,7 @@ fn attack(val: u32, time: u32) -> Option<u32> {
     let limit = time - 1000 * 60; // 1 minute lookback
     let mut seed = time;
     while seed > limit {
-        let mut prng = utils::MT19937::new(seed);
+        let mut prng = utils::MT19937::from_seed(seed);
         if prng.gen() == val {
             return Some(seed);
         }
