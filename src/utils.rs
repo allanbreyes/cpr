@@ -180,8 +180,8 @@ pub fn hamming(s1: &[u8], s2: &[u8]) -> u32 {
 ///
 /// See challenge 21 or https://en.wikipedia.org/wiki/Mersenne_Twister
 pub struct MT19937 {
-    mt: Vec<u32>,
-    index: usize,
+    pub mt: Vec<u32>,
+    pub index: usize,
     config: MT19937Config,
 }
 
