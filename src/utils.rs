@@ -3,7 +3,10 @@ use aes::{
     Aes128,
 };
 use rand::Rng;
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 pub struct Candidate<T> {
     pub score: f32,
@@ -281,6 +284,31 @@ impl MT19937 {
         }
         self.index = 0;
     }
+}
+
+/// Return the current time in milliseconds since the Unix epoch.
+pub fn now() -> u32 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis() as u32
+}
+
+impl PRNG for MT19937 {
+    fn gen(&mut self) -> u32 {
+        MT19937::gen(self)
+    }
+}
+
+pub trait PRNG {
+    fn gen(&mut self) -> u32;
+}
+
+/// Use a PRNG to generate a keystream and XOR some bytes.
+///
+/// See challenge 24.
+pub fn prng_stream_cipher(bytes: &[u8], prng: &mut impl PRNG) -> Vec<u8> {
+    bytes.iter().map(|b| b ^ (prng.gen() as u8)).collect()
 }
 
 /// PKCS#7 padding.
