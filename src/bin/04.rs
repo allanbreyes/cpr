@@ -38,6 +38,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test() -> Result<(), Box<dyn Error>> {
         let input = &cpr::read_data(4, false)?;
         let want = Some("Now that the party is jumping".into());

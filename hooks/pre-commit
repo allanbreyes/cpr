@@ -11,14 +11,6 @@ if [ $CHECK -ne 0 ]; then
     exit 1
 fi
 
-echo -e "$GRN[*]$RST cargo test"
-cargo test --quiet >/dev/null
-TEST=$?
-if [ $TEST -ne 0 ]; then
-    echo -e "$RED[!]$RST tests failed, aborting commit"
-    exit 1
-fi
-
 echo -e "$GRN[*]$RST cargo fmt"
 cargo fmt --check
 FMT=$?
@@ -34,5 +26,21 @@ FMT=$?
 if [ $FMT -ne 0 ]; then
     echo -e "$RED[!]$RST clippy failed, aborting commit and fixing code"
     cargo clippy --fix --allow-dirty
+    exit 1
+fi
+
+echo -e "$GRN[*]$RST cargo test"
+cargo test --quiet >/dev/null
+TEST=$?
+if [ $TEST -ne 0 ]; then
+    echo -e "$RED[!]$RST tests failed, aborting commit"
+    exit 1
+fi
+
+echo -e "$GRN[*]$RST cargo test (slow)"
+cargo test --quiet -- --ignored >/dev/null
+TEST=$?
+if [ $TEST -ne 0 ]; then
+    echo -e "$RED[!]$RST tests failed, aborting commit"
     exit 1
 fi

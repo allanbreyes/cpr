@@ -65,6 +65,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test() -> Result<(), Box<dyn Error>> {
         let input = &cpr::read_data(6, false)?;
         let has = "play that funky music";

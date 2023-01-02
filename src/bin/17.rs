@@ -129,6 +129,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test() -> Result<(), Box<dyn Error>> {
         let input = &cpr::read_data(17, false)?;
         let has = "000000Now that the party is jumping";

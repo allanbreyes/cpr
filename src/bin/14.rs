@@ -104,6 +104,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test() -> Result<(), Box<dyn Error>> {
         let input = &cpr::read_data(14, true)?;
         let want = Some("Rollin' in my 5.0\nWith my rag-top down so my hair can blow\nThe girlies on standby waving just to say hi\nDid you stop? No, I just drove by\n".into());
