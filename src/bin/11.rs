@@ -53,8 +53,7 @@ fn rand_pad(rng: &mut ThreadRng) -> Vec<u8> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input = &cpr::read_data(11, false)?;
-    cpr::solve!(11, solve, input).ok_or("no solution")?;
+    cpr::solve!(11, solve, "").ok_or("no solution")?;
     Ok(())
 }
 
@@ -64,9 +63,8 @@ mod tests {
 
     #[test]
     fn test() -> Result<(), Box<dyn Error>> {
-        let input = &cpr::read_data(11, true)?;
         let want = Some("10/10 correct guesses".into());
-        let got = solve(input);
+        let got = solve("");
         assert_eq!(want, got);
         Ok(())
     }

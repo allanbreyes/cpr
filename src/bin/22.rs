@@ -44,8 +44,7 @@ fn attack(val: u32, time: u32) -> Option<u32> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input = &cpr::read_data(22, false)?;
-    cpr::solve!(22, solve, input).ok_or("no solution")?;
+    cpr::solve!(22, solve, "").ok_or("no solution")?;
     Ok(())
 }
 
@@ -56,8 +55,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test() -> Result<(), Box<dyn Error>> {
-        let input = &cpr::read_data(22, false)?;
-        let got = solve(input);
+        let got = solve("");
         assert!(got.is_some());
         Ok(())
     }

@@ -1,9 +1,19 @@
 // Implement the MT19937 Mersenne Twister RNG
 use cpr::utils;
-use std::error::Error;
+use std::{
+    error::Error,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 pub fn solve(input: &str) -> Option<String> {
-    let seed = input.trim().parse().ok()?;
+    let seed = if input.is_empty() {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as u32
+    } else {
+        input.parse().ok()?
+    };
     let mut prng = utils::MT19937::new(seed);
     Some(
         (0..5)
@@ -14,8 +24,7 @@ pub fn solve(input: &str) -> Option<String> {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input = &cpr::read_data(21, true)?;
-    cpr::solve!(21, solve, input).ok_or("no solution")?;
+    cpr::solve!(21, solve, "").ok_or("no solution")?;
     Ok(())
 }
 

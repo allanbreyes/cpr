@@ -130,8 +130,7 @@ fn make_oracle() -> (Vec<u8>, impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn Error>
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input = &cpr::read_data(13, false)?;
-    let solution = cpr::solve!(13, solve, input).ok_or("no solution")?;
+    let solution = cpr::solve!(13, solve, "").ok_or("no solution")?;
     let bytes = hex::decode(&solution)?;
     let (key, ciphertext) = bytes.split_at(16);
     let cookie = Cookie::decrypt(ciphertext, key)?;
@@ -150,8 +149,7 @@ mod tests {
 
     #[test]
     fn test() -> Result<(), Box<dyn Error>> {
-        let input = &cpr::read_data(13, false)?;
-        let got = solve(input).ok_or("no result")?;
+        let got = solve("").ok_or("no result")?;
         let bytes = hex::decode(&got)?;
         let (key, ciphertext) = bytes.split_at(16);
         let cookie = Cookie::decrypt(&ciphertext, key)?;

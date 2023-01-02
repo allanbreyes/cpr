@@ -63,8 +63,7 @@ fn make_oracles() -> (
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let input = &cpr::read_data(16, false)?;
-    cpr::solve!(16, solve, input).ok_or("no solution")?;
+    cpr::solve!(16, solve, "").ok_or("no solution")?;
     Ok(())
 }
 
@@ -74,9 +73,8 @@ mod tests {
 
     #[test]
     fn test() -> Result<(), Box<dyn Error>> {
-        let input = &cpr::read_data(16, false)?;
         let has = ";admin=true";
-        let got = solve(input);
+        let got = solve("");
         assert!(got.unwrap().contains(has));
         Ok(())
     }
