@@ -1,3 +1,4 @@
+// Break fixed-nonce CTR mode using substitutions
 use cpr::utils;
 use std::error::Error;
 

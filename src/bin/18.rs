@@ -1,3 +1,4 @@
+// Implement CTR, the stream cipher mode
 use cpr::utils;
 use std::error::Error;
 
