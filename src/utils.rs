@@ -176,6 +176,103 @@ pub fn hamming(s1: &[u8], s2: &[u8]) -> u32 {
         .sum()
 }
 
+/// MT19937 PRNG.
+///
+/// See challenge 21 or https://en.wikipedia.org/wiki/Mersenne_Twister
+pub struct MT19937 {
+    mt: Vec<u32>,
+    index: usize,
+    config: MT19937Config,
+}
+
+struct MT19937Config {
+    // w: u32,
+    n: usize,
+    m: usize,
+    // r: u32,
+    a: u32,
+    u: u32,
+    d: u32,
+    s: u32,
+    b: u32,
+    t: u32,
+    c: u32,
+    l: u32,
+    lower_mask: u32,
+    upper_mask: u32,
+}
+
+impl MT19937 {
+    pub fn new(seed: u32) -> Self {
+        // Use known coefficients
+        let n = 624;
+        let r = 31;
+        let w = 32;
+        let config = MT19937Config {
+            n,
+            m: 397,
+            a: 0x9908B0DF,
+            u: 11,
+            d: 0xFFFFFFFF,
+            s: 7,
+            b: 0x9D2C5680,
+            t: 15,
+            c: 0xEFC60000,
+            l: 18,
+            lower_mask: (1 << r) - 1,
+            upper_mask: !((1 << r) - 1),
+        };
+
+        // Initialization
+        let mut mt = vec![0; n];
+        let index = n;
+
+        // Seed
+        mt[0] = seed;
+        for i in 1..n {
+            mt[i] = 1812433253_u32
+                .wrapping_mul(mt[i - 1] ^ (mt[i - 1] >> (w - 2)))
+                .wrapping_add(i as u32);
+        }
+
+        Self { mt, index, config }
+    }
+
+    pub fn gen(&mut self) -> u32 {
+        if self.index >= self.config.n {
+            self.twist();
+        }
+
+        let mut y = self.mt[self.index];
+        y ^= (y >> self.config.u) & self.config.d;
+        y ^= (y << self.config.s) & self.config.b;
+        y ^= (y << self.config.t) & self.config.c;
+        y ^= y >> self.config.l;
+
+        self.index += 1;
+        y
+    }
+
+    fn twist(&mut self) {
+        let config = &self.config;
+        let n = config.n;
+        let m = config.m;
+        let a = config.a;
+        let lower_mask = config.lower_mask;
+        let upper_mask = config.upper_mask;
+
+        for i in 0..n {
+            let x = (self.mt[i] & upper_mask) + (self.mt[(i + 1) % n] & lower_mask);
+            let mut x_a = x >> 1;
+            if x % 2 != 0 {
+                x_a ^= a;
+            }
+            self.mt[i] = self.mt[(i + m) % n] ^ x_a;
+        }
+        self.index = 0;
+    }
+}
+
 /// PKCS#7 padding.
 ///
 /// See challenge 9.
