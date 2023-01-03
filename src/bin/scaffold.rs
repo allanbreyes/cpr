@@ -6,7 +6,8 @@ use std::{
 };
 
 const STATIC_BASE_URL: &str = "https://cryptopals.com/static/challenge-data";
-const TEMPLATE: &str = r###"use cpr::utils;
+const TEMPLATE: &str = r###"// TITLE
+use cpr::utils;
 use std::error::Error;
 
 pub fn solve(input: &str) -> Option<String> {
