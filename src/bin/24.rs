@@ -1,3 +1,4 @@
+// Create the MT19937 stream cipher and break it
 use cpr::utils::{self, MT19937};
 use rand::Rng;
 use std::error::Error;
