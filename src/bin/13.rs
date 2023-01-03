@@ -152,7 +152,7 @@ mod tests {
         let got = solve("").ok_or("no result")?;
         let bytes = hex::decode(&got)?;
         let (key, ciphertext) = bytes.split_at(16);
-        let cookie = Cookie::decrypt(&ciphertext, key)?;
+        let cookie = Cookie::decrypt(ciphertext, key)?;
         assert!(cookie.is_admin());
         Ok(())
     }

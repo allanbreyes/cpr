@@ -89,7 +89,7 @@ mod tests {
         let got = solve("");
         // Anything less than 10 means that the cloned PRNG didn't match some
         // output of the original PRNG
-        assert!(got.unwrap().lines().collect::<Vec<&str>>().len() == 10);
+        assert!(got.unwrap().lines().count() == 10);
         Ok(())
     }
 }
