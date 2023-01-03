@@ -6,7 +6,7 @@ pub fn solve(input: &str) -> Option<String> {
     let key: &[u8] = b"YELLOW SUBMARINE";
     let iv = [0; 16];
     let ciphertext = base64::decode(input.trim()).ok()?;
-    let plaintext = utils::cbc(&ciphertext, key, &iv, 16, true);
+    let plaintext = utils::cbc(&ciphertext, key, &iv, utils::Op::Decrypt);
     String::from_utf8(plaintext).ok()
 }
 

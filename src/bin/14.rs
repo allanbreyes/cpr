@@ -89,7 +89,7 @@ fn make_oracle(target: Vec<u8>) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn E
             .chain(target.iter())
             .cloned()
             .collect::<Vec<u8>>();
-        Ok(utils::ecb(&all, &key, 16, false))
+        Ok(utils::ecb(&all, &key, utils::Op::Encrypt))
     }
 }
 

@@ -99,13 +99,13 @@ impl ToString for Cookie {
 
 impl Cookie {
     fn decrypt(ciphertext: &[u8], key: &[u8]) -> Result<Self, Box<dyn Error>> {
-        let plaintext = utils::ecb(ciphertext, key, 16, true);
+        let plaintext = utils::ecb(ciphertext, key, utils::Op::Decrypt);
         String::from_utf8(plaintext)?.parse()
     }
 
     fn encrypt(&self, key: &[u8]) -> Vec<u8> {
         let plaintext = self.to_string().into_bytes();
-        utils::ecb(&plaintext, key, 16, false)
+        utils::ecb(&plaintext, key, utils::Op::Encrypt)
     }
 
     fn is_admin(&self) -> bool {

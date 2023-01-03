@@ -35,10 +35,13 @@ fn encryption_oracle(data: &[u8], rng: &mut ThreadRng) -> (Vec<u8>, Mode) {
     plaintext = utils::pkcs7_pad(&plaintext, 16);
 
     if rng.gen::<u8>() % 2 == 0 {
-        (utils::ecb(&plaintext, &key, 16, false), Mode::ECB)
+        (utils::ecb(&plaintext, &key, utils::Op::Encrypt), Mode::ECB)
     } else {
         let iv = rand_block(rng);
-        (utils::cbc(&plaintext, &key, &iv, 16, false), Mode::CBC)
+        (
+            utils::cbc(&plaintext, &key, &iv, utils::Op::Encrypt),
+            Mode::CBC,
+        )
     }
 }
 

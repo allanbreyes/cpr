@@ -26,7 +26,7 @@ pub fn solve(_input: &str) -> Option<String> {
 
 fn decrypt(ct: Vec<u8>, key: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     let iv = ct[..key.len()].to_vec();
-    let pt = utils::cbc(&ct[key.len()..], key, &iv, key.len(), true);
+    let pt = utils::cbc(&ct[key.len()..], key, &iv, utils::Op::Decrypt);
     Ok(pt)
 }
 
@@ -48,7 +48,7 @@ fn encrypt(pt: Vec<u8>, key: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     ]
     .concat();
 
-    Ok([iv.clone(), utils::cbc(&full, key, &iv, key.len(), false)].concat())
+    Ok([iv.clone(), utils::cbc(&full, key, &iv, utils::Op::Encrypt)].concat())
 }
 
 fn make_oracles() -> (

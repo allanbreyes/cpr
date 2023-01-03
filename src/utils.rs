@@ -8,6 +8,11 @@ use std::{
     time::{SystemTime, UNIX_EPOCH},
 };
 
+pub enum Op {
+    Encrypt,
+    Decrypt,
+}
+
 pub struct Candidate<T> {
     pub score: f32,
     pub value: T,
@@ -21,21 +26,22 @@ pub type Oracle = dyn Fn(Vec<u8>) -> Result<Vec<u8>, Box<dyn std::error::Error>>
 ///
 /// # Examples
 /// ```
-/// use cpr::utils::{cbc, rand_bytes};
+/// use cpr::utils::{cbc, rand_bytes, Op};
 /// let key = rand_bytes(16);
 /// let iv = rand_bytes(key.len());
 /// let pt = b"YELLOW SUBMARINE";
-/// let ct = cbc(pt, &key, &iv, key.len(), false);
-/// let out = cbc(&ct, &key, &iv, key.len(), true);
+/// let ct = cbc(pt, &key, &iv, Op::Encrypt);
+/// let out = cbc(&ct, &key, &iv, Op::Decrypt);
 /// assert_eq!(pt, &out[..]);
 /// ```
-pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
+pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], op: Op) -> Vec<u8> {
+    let block_size = key.len();
     let cipher = Aes128::new(GenericArray::from_slice(key));
     let mut prev = iv.to_vec();
     pkcs7_pad(bytes, block_size)
         .chunks(block_size)
-        .flat_map(|chunk| {
-            if decrypt {
+        .flat_map(|chunk| match op {
+            Op::Decrypt => {
                 let mut block = GenericArray::from_slice(chunk).to_owned();
                 cipher.decrypt_block(&mut block);
                 let out = block
@@ -45,7 +51,8 @@ pub fn cbc(bytes: &[u8], key: &[u8], iv: &[u8], block_size: usize, decrypt: bool
                     .collect::<Vec<u8>>();
                 prev = chunk.to_owned();
                 out
-            } else {
+            }
+            Op::Encrypt => {
                 let xor = chunk
                     .iter()
                     .zip(prev.iter())
@@ -87,7 +94,8 @@ pub fn crack_single_byte_xor(
 /// CTR stream cipher.
 ///
 /// See challenge 18.
-pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, block_size: usize) -> Vec<u8> {
+pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, op: Op) -> Vec<u8> {
+    let block_size = key.len();
     let cipher = Aes128::new(GenericArray::from_slice(key));
     let mut counter: u64 = 0;
     bytes
@@ -102,7 +110,10 @@ pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, block_size: usize) -> Vec<u8> {
                     .collect::<Vec<u8>>(),
             )
             .to_owned();
-            cipher.encrypt_block(&mut block);
+            match op {
+                Op::Encrypt => cipher.encrypt_block(&mut block),
+                Op::Decrypt => cipher.decrypt_block(&mut block),
+            }
             let out = block
                 .iter()
                 .zip(chunk.iter())
@@ -148,16 +159,16 @@ pub fn detect_ecb(ciphertext: &[u8], block_size: usize) -> bool {
 /// Apply AES in ECB mode.
 ///
 /// See challenge 7.
-pub fn ecb(bytes: &[u8], key: &[u8], block_size: usize, decrypt: bool) -> Vec<u8> {
+pub fn ecb(bytes: &[u8], key: &[u8], op: Op) -> Vec<u8> {
+    let block_size = key.len();
     let cipher = Aes128::new(GenericArray::from_slice(key));
     pkcs7_pad(bytes, block_size)
         .chunks(block_size)
         .flat_map(|chunk| {
             let mut block = GenericArray::from_slice(chunk).to_owned();
-            if decrypt {
-                cipher.decrypt_block(&mut block);
-            } else {
-                cipher.encrypt_block(&mut block);
+            match op {
+                Op::Decrypt => cipher.decrypt_block(&mut block),
+                Op::Encrypt => cipher.encrypt_block(&mut block),
             }
             block.to_vec()
         })

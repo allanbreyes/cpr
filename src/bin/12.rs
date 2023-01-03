@@ -45,8 +45,7 @@ fn make_oracle(plaintext: Vec<u8>) -> impl Fn(Vec<u8>) -> Result<Vec<u8>, Box<dy
                 .cloned()
                 .collect::<Vec<u8>>(),
             &key,
-            16,
-            false,
+            utils::Op::Encrypt,
         );
         Ok(ct)
     }

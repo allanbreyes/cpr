@@ -6,7 +6,7 @@ use std::error::Error;
 pub fn solve(ciphertext: &str) -> Option<String> {
     let key = GenericArray::from(b"YELLOW SUBMARINE".to_owned());
     let bytes = base64::decode(ciphertext.trim().replace('\n', "").as_bytes()).ok()?;
-    let plaintext = utils::ecb(&bytes, &key, 16, true);
+    let plaintext = utils::ecb(&bytes, &key, utils::Op::Decrypt);
     String::from_utf8(plaintext).ok()
 }
 

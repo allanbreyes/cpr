@@ -87,15 +87,14 @@ fn attack_block(
 }
 
 fn decrypt(cg: Vec<u8>, key: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
-    let block_size = key.len();
     let (iv, ct) = cg.split_at(key.len());
-    let pt = utils::cbc(ct, key, iv, block_size, true);
+    let pt = utils::cbc(ct, key, iv, utils::Op::Decrypt);
     Ok(pt)
 }
 
 fn encrypt(pt: Vec<u8>, key: &[u8]) -> Result<Vec<u8>, Box<dyn Error>> {
     let iv = utils::rand_bytes(key.len());
-    let ct = utils::cbc(&pt, key, &iv, key.len(), false);
+    let ct = utils::cbc(&pt, key, &iv, utils::Op::Encrypt);
     Ok([iv, ct].concat())
 }
 
