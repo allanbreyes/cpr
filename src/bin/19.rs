@@ -13,7 +13,7 @@ pub fn solve(input: &str) -> Option<String> {
         .lines()
         .map(|line| {
             let bytes = base64::decode(line).unwrap();
-            utils::ctr(&bytes, &key, 0, utils::Op::Encrypt)
+            utils::ctr(&bytes, &key, 0)
         })
         .collect::<Vec<Vec<u8>>>();
 

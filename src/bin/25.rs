@@ -34,15 +34,15 @@ fn attack(ct: &[u8], oracle: &dyn Fn(&[u8], usize, &[u8]) -> Vec<u8>) -> Vec<u8>
 }
 
 fn edit(ct: &[u8], key: &[u8], nonce: u64, offset: usize, nt: &[u8]) -> Vec<u8> {
-    let mut pt = utils::ctr(ct, key, nonce, utils::Op::Decrypt);
+    let mut pt = utils::ctr(ct, key, nonce);
     for (i, byte) in nt.iter().enumerate() {
         pt[offset + i] = *byte;
     }
-    utils::ctr(&pt, key, nonce, utils::Op::Encrypt)
+    utils::ctr(&pt, key, nonce)
 }
 
 fn encrypt(pt: &[u8], key: &[u8], nonce: u64) -> Vec<u8> {
-    utils::ctr(pt, key, nonce, utils::Op::Encrypt)
+    utils::ctr(pt, key, nonce)
 }
 
 fn main() -> Result<(), Box<dyn Error>> {

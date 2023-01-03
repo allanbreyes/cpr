@@ -5,7 +5,7 @@ use std::error::Error;
 pub fn solve(input: &str) -> Option<String> {
     let key = b"YELLOW SUBMARINE";
     let ct = base64::decode(input).ok()?;
-    let pt = utils::ctr(&ct, key, 0, utils::Op::Encrypt);
+    let pt = utils::ctr(&ct, key, 0);
     String::from_utf8(pt).ok()
 }
 

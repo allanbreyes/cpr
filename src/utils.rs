@@ -94,7 +94,7 @@ pub fn crack_single_byte_xor(
 /// CTR stream cipher.
 ///
 /// See challenge 18.
-pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, op: Op) -> Vec<u8> {
+pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64) -> Vec<u8> {
     let block_size = key.len();
     let cipher = Aes128::new(GenericArray::from_slice(key));
     let mut counter: u64 = 0;
@@ -110,10 +110,9 @@ pub fn ctr(bytes: &[u8], key: &[u8], nonce: u64, op: Op) -> Vec<u8> {
                     .collect::<Vec<u8>>(),
             )
             .to_owned();
-            match op {
-                Op::Encrypt => cipher.encrypt_block(&mut block),
-                Op::Decrypt => cipher.decrypt_block(&mut block),
-            }
+            // NOTE: it doesn't matter if we are encrypting or decrypting, we
+            // always want to encrypt the nonce and counter to get the keystream
+            cipher.encrypt_block(&mut block);
             let out = block
                 .iter()
                 .zip(chunk.iter())
